@@ -1,0 +1,20 @@
+﻿@page "/login"
+@inject IHttpContextAccessor HttpContextAccessor
+
+<h3>Login</h3>
+<input @bind="Username" placeholder="Username" />
+<input @bind="Password" type="password" placeholder="Password" />
+<button @onclick="LoginTask">Login</button>
+
+@code {
+    private string Username;
+    private string Password;
+
+    private async Task LoginTask()
+    {
+        // Example: Simulate fetching token from API
+        var token = "example-jwt-token";
+
+        HttpContextAccessor.HttpContext.Session.SetString("authToken", token);
+    }
+}

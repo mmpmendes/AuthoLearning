@@ -1,34 +1,16 @@
 ﻿@page "/secured"
 @using Auth.Web.Services
+@rendermode InteractiveServer
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize]
-@inject TestApiService apiService
 
 <PageTitle>Secured</PageTitle>
-
-
 <h3>Secure Page</h3>
+
 <p>@UserName - You must be logged in to see this content.</p>
 
-<button class="btn btn-primary" @onclick="doApiRequest">ApiRequest</button>
+<button class="btn btn-primary" @onclick="DoApiRequest">ApiRequest</button>
 
+<hr />
+<h4>Resposta da Api</h4>
 <p>@response</p>
-
-@code {
-    private string UserName;
-    private string response;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        UserName = user.Identity.IsAuthenticated ? user.Identity.Name : "Guest";
-    }
-
-
-    private void doApiRequest(MouseEventArgs e)
-    {
-        response = apiService.GetSomeDataAsync();
-    }
-}

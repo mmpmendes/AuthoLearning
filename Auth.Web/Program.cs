@@ -5,16 +5,23 @@ using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IEnumerable<string>? initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ');
-
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 builder.AddRedisOutputCache("cache");
 
+//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
+IEnumerable<string>? initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ');
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "AzureAd")
                 .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-                .AddDownstreamApi("DownstreamApi"
-                                , builder.Configuration.GetSection("DownstreamApi"))
+//.AddMicrosoftGraph(builder.Configuration.GetSection("DownstreamApi"))
+//.AddDownstreamApi("DownstreamApi", builder.Configuration.GetSection("DownstreamApi"))
                 .AddInMemoryTokenCaches();
 
 // Add services to the container.
@@ -26,8 +33,8 @@ builder.Services.AddHttpClient<TestApiService>("Test", client =>
     {
         client.BaseAddress = new("https+http://apiservice");
     });
-
-builder.Services.AddScoped<TestApiService>();
+//    .AddHttpMessageHandler<MicrosoftIdentityAppAuthenticationMessageHandler>();
+//builder.Services.AddTransient<MicrosoftIdentityAppAuthenticationMessageHandler>();
 
 var app = builder.Build();
 

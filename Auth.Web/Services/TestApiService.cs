@@ -15,27 +15,27 @@ namespace Auth.Web.Services
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> GetSomeNewDataAsync()
+        public async Task<string> GetSomeNewDataAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                IEnumerable<string>? initialScopes = configuration["DownstreamApi:Scopes"]?.Split(' ');
+                IEnumerable<string>? initialScopes = configuration["AzureAd:Scopes"]?.Split(' ');
+
                 // Acquire the token
-                var accessToken = await tokenAcquisition.GetAccessTokenForUserAsync([""]);
+                var accessToken = await tokenAcquisition.GetAccessTokenForUserAsync(initialScopes);
 
                 // Add the token to the request
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
                 // Call the API
-                var response = await httpClient.GetAsync("api/Test");
+                var response = await httpClient.GetAsync("api/Test", cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 return await response.Content.ReadAsStringAsync();
             }
-            catch (MsalUiRequiredException ex)
+            catch (MsalUiRequiredException)
             {
-                // This exception indicates that a token cannot be acquired silently
-                throw new InvalidOperationException("Token acquisition failed. User interaction is required.", ex);
+                throw;
             }
         }
     }

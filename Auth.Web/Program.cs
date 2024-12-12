@@ -2,6 +2,7 @@ using Auth.Web.Components;
 using Auth.Web.Services;
 
 using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,32 +10,37 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddRedisOutputCache("cache");
 
-//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+
+
+IEnumerable<string>? initialScopes = builder.Configuration["AzureAd:Scopes"]?.Split(' ');
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "AzureAd")
+                .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
+                //.AddMicrosoftGraph(builder.Configuration.GetSection("DownstreamApi"))
+                .AddDownstreamApi("DownstreamApi", builder.Configuration.GetSection("DownstreamApi"))
+                .AddInMemoryTokenCaches();
 
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = options.DefaultPolicy;
 });
 
-IEnumerable<string>? initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ');
-builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "AzureAd")
-                .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-//.AddMicrosoftGraph(builder.Configuration.GetSection("DownstreamApi"))
-//.AddDownstreamApi("DownstreamApi", builder.Configuration.GetSection("DownstreamApi"))
-                .AddInMemoryTokenCaches();
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents()
                 .AddMicrosoftIdentityConsentHandler();
 
-builder.Services.AddHttpClient<TestApiService>("Test", client =>
+builder.Services.AddServerSideBlazor()
+                .AddMicrosoftIdentityConsentHandler();
+
+builder.Services.AddControllersWithViews()
+                .AddMicrosoftIdentityUI();
+
+
+
+builder.Services.AddHttpClient<TestApiService>("TestApiService", client =>
     {
         client.BaseAddress = new("https+http://apiservice");
     });
-//    .AddHttpMessageHandler<MicrosoftIdentityAppAuthenticationMessageHandler>();
-//builder.Services.AddTransient<MicrosoftIdentityAppAuthenticationMessageHandler>();
 
 var app = builder.Build();
 

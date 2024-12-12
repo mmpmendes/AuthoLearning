@@ -10,23 +10,6 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
 
-//Configure Azure AD authentication
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//.AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
-//.EnableTokenAcquisitionToCallDownstreamApi(initialScopes);
-
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        var azureAdSettings = builder.Configuration.GetSection("AzureAd");
-//        options.Authority = $"{azureAdSettings["Instance"]}{azureAdSettings["TenantId"]}/v2.0";
-//        options.Audience = azureAdSettings["Audience"];
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidIssuer = azureAdSettings["Issuer"]
-//        };
-//    });
 builder.Services.AddAuthorization();
 
 
@@ -34,7 +17,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "test.api", Version = "v1" });
 });
-
 
 builder.Services.AddControllers();
 
